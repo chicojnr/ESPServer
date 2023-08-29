@@ -151,6 +151,7 @@ app.get('/get-table-parameter', async (req, res) => {
         const header = [
             { name: "id", title: "Id", sortable: true, size: 100 },
             { name: "name", title: "Nome", sortable: true },
+            { name: "device", title: "Dispositivo", sortable: true },
             { name: "minvalue", title: "Valor Mínimo", sortable: true },
             { name: "maxvalue", title: "Valor Máximo", sortable: true }
         ];
@@ -175,6 +176,52 @@ app.post('/post-company', async (req, res) => {
     }
     return res.status(200).send(ret);
 });
+
+app.post('/post-branch', async (req, res) => {
+    const { id, idcompany, name, isdeleted } = req.body;
+    const data = {
+        id: id,
+        idcompany: idcompany,
+        name: name,
+        isdeleted: isdeleted
+    }
+    const returnId = await db.insertData('branch', data);
+    const ret = {
+        id: returnId
+    }
+    return res.status(200).send(ret);
+});
+
+app.post('/post-department', async (req, res) => {
+    const { id, idbranch, name, isdeleted } = req.body;
+    const data = {
+        id: id,
+        idbranch: idbranch,
+        name: name,
+        isdeleted: isdeleted
+    }
+    const returnId = await db.insertData('department', data);
+    const ret = {
+        id: returnId
+    }
+    return res.status(200).send(ret);
+});
+
+app.post('/post-panel', async (req, res) => {
+    const { id, iddepartment, name, isdeleted } = req.body;
+    const data = {
+        id: id,
+        iddepartment: iddepartment,
+        name: name,
+        isdeleted: isdeleted
+    }
+    const returnId = await db.insertData('panel', data);
+    const ret = {
+        id: returnId
+    }
+    return res.status(200).send(ret);
+});
+
 
 app.post('/post-sensortype', async (req, res) => {
     const { id, name, isdeleted } = req.body;
@@ -204,6 +251,25 @@ app.post('/post-sensor', async (req, res) => {
         isdeleted: isdeleted
     }
     const returnId = await db.insertData('sensor', data);
+    const ret = {
+        id: returnId
+    }
+    return res.status(200).send(ret);
+});
+
+app.post('/post-parameter', async (req, res) => {
+    const { id, idpanel, idsensor, name, minvalue, maxvalue, isdeleted } = req.body;
+    const data = {
+        id: id,
+        idpanel: idpanel,
+        idsensor: idsensor,
+        name: name,
+        minvalue: minvalue,
+        maxvalue: maxvalue,
+        isdeleted: isdeleted
+    }
+    console.log(data)
+    const returnId = await db.insertData('sensorpanel', data);
     const ret = {
         id: returnId
     }

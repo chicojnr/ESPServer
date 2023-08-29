@@ -26,10 +26,7 @@ const conn2 = mysql2.createPool({
 
 
 async function insertData(table, data) {
-
     try {
-        console.log(data);
-
         if (data.id === undefined || data.id === null || data.id === '') {
             delete data.id;
             const insertSql = `INSERT INTO ${table} SET ?`;
@@ -48,80 +45,6 @@ async function insertData(table, data) {
         console.error(`Error on insertOrUpdate at ${table} ---> ${err}`);
         throw err;
     }
-
-
-
-
-
-    // try {
-    //     console.log(data)
-    //     if (data.id === undefined || data.id === null || data.id === '') {
-    //         delete data.id
-    //         const insertSql = `INSERT INTO ${table} SET ?`;
-    //         return new Promise((resolve, reject) => {
-    //             conn2.query(insertSql, [data], (err, results, fields) => {
-    //                 if (err) {
-    //                     console.error(err);
-    //                     console.error(`Error on inserting in table ${table}. Detail: ${table === 'chat' ? data.displayMessage : 'outro'}`);
-    //                     reject(err);
-    //                 } else {
-    //                     console.log(`1 row inserted in table ${table}!`);
-    //                     resolve(results.insertId);
-    //                 }
-    //             });
-    //         });
-    //     } else {
-    //         const updateSql = `UPDATE ${table} SET ? WHERE id = ?`;
-    //         return new Promise((resolve, reject) => {
-    //             conn2.query(updateSql, [data, data.id], (err, results, fields) => {
-    //                 if (err) {
-    //                     console.error(err);
-    //                     console.error(`Error on updating in table ${table}. Id: ${data.id}`);
-    //                     reject(err);
-    //                 } else {
-    //                     if (results.affectedRows === 1) {
-    //                         console.log(`Row updated in table ${table}!`);
-    //                     }
-    //                     resolve(results);
-    //                 }
-    //             });
-    //         });
-    //     }
-    // } catch (err) {
-    //     console.error(`Error on insertOrUpdate at ${table} ---> ${err}`);
-    //     throw err;
-    // }
-
-
-
-
-
-
-
-
-    // try {
-    //     const sql = `INSERT INTO ${table} SET ? ON DUPLICATE KEY UPDATE ${getUpdateString(data)}`;
-    //     return new Promise((resolve, reject) => {
-    //         conn1.query(sql, [data], (err, results, fields) => {
-    //             if (err) {
-    //                 console.error(err);
-    //                 console.error(`Error on inserting in table ${table}. Id: ${data.id} Detail: ${table === 'chat' ? data.displayMessage : 'outro'}`);
-    //                 reject(err); // Rejeita a promessa em caso de erro
-    //             } else {
-    //                 if (results.affectedRows === 1) {
-    //                     console.log(`1 row inserted in table ${table}!`);
-    //                     resolve(results.insertId);
-    //                 } else {
-    //                     console.log(`Row updated in table ${table}!`);
-    //                 }
-    //                 resolve(results); // Resolve a promessa em caso de sucesso
-    //             }
-    //         });
-    //     });
-    // } catch (err) {
-    //     console.error(`Error on insert at ${table} ---> ${err}`);
-    //     throw err; // Relança o erro para que possa ser capturado por quem chama a função
-    // }
 }
 
 async function getAllCompanies() {
@@ -253,9 +176,12 @@ async function getMonitorParamenters(pIdPanel) {
     var sql = `
         SELECT A.id,
                A.name,
+               B.name device,
                A.minvalue,
                A.maxvalue
           FROM sensorpanel A
+          JOIN sensor B 
+            ON B.id = A.idsensor
          WHERE A.isdeleted = 0
            AND A.idpanel = ?
       ORDER BY 1`;
