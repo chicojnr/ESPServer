@@ -1,12 +1,20 @@
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
-const db = require('./db');
+//const db = require('./db');
+const pgdb = require('./postgresql.js');
 const app = express();
 app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+// async function testePG() {
+//     await pgdb.insertData('branch', { id: 5, idcompany: 2, name: 'teste cu testese' });
+//     const data = await pgdb.getBranchesByCompany(2);
+//     console.log(data)
+// }
+
+// testePG()
 
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -53,37 +61,37 @@ app.get('/send-data', (req, res) => {
 });
 
 app.get('/get-company', async (req, res) => {
-    const data = await db.getAllCompanies();
+    const data = await pgdb.getAllCompanies();
     res.status(200).send(data);
 });
 
 app.get('/get-branch', async (req, res) => {
-    const data = await db.getBranchesByCompany(req.query.idcompany);
+    const data = await pgdb.getBranchesByCompany(req.query.idcompany);
     res.status(200).send(data);
 });
 
 app.get('/get-department', async (req, res) => {
-    const data = await db.getDepartmentsByBranch(req.query.idbranch);
+    const data = await pgdb.getDepartmentsByBranch(req.query.idbranch);
     res.status(200).send(data);
 });
 
 app.get('/get-panel', async (req, res) => {
-    const data = await db.getPanelsByDepartment(req.query.iddepartment);
+    const data = await pgdb.getPanelsByDepartment(req.query.iddepartment);
     res.status(200).send(data);
 });
 
 app.get('/get-sensor', async (req, res) => {
-    const data = await db.getAllSensors();
+    const data = await pgdb.getAllSensors();
     res.status(200).send(data);
 });
 
 app.get('/get-sensortype', async (req, res) => {
-    const data = await db.getAllSensorTypes();
+    const data = await pgdb.getAllSensorTypes();
     res.status(200).send(data);
 });
 
 app.get('/get-table-company', async (req, res) => {
-    const data = await db.getAllCompanies();
+    const data = await pgdb.getAllCompanies();
     const header = [
         { name: "id", title: "Id", sortable: true, size: 100 },
         { name: "name", title: "Nome", sortable: true }
@@ -93,7 +101,7 @@ app.get('/get-table-company', async (req, res) => {
 });
 
 app.get('/get-table-branch', async (req, res) => {
-    const data = await db.getBranchesByCompany(req.query.idcompany);
+    const data = await pgdb.getBranchesByCompany(req.query.idcompany);
     const header = [
         { name: "id", title: "Id", sortable: true, size: 100 },
         { name: "name", title: "Nome", sortable: true }
@@ -103,7 +111,7 @@ app.get('/get-table-branch', async (req, res) => {
 });
 
 app.get('/get-table-department', async (req, res) => {
-    const data = await db.getDepartmentsByBranch(req.query.idbranch);
+    const data = await pgdb.getDepartmentsByBranch(req.query.idbranch);
     const header = [
         { name: "id", title: "Id", sortable: true, size: 100 },
         { name: "name", title: "Nome", sortable: true }
@@ -113,7 +121,7 @@ app.get('/get-table-department', async (req, res) => {
 });
 
 app.get('/get-table-panel', async (req, res) => {
-    const data = await db.getPanelsByDepartment(req.query.iddepartment);
+    const data = await pgdb.getPanelsByDepartment(req.query.iddepartment);
     const header = [
         { name: "id", title: "Id", sortable: true, size: 100 },
         { name: "name", title: "Nome", sortable: true }
@@ -122,9 +130,8 @@ app.get('/get-table-panel', async (req, res) => {
     res.status(200).send(response);
 });
 
-
 app.get('/get-table-sensortype', async (req, res) => {
-    const data = await db.getAllSensorTypes();
+    const data = await pgdb.getAllSensorTypes();
     const header = [
         { name: "id", title: "Id", sortable: true, size: 100 },
         { name: "name", title: "Nome", sortable: true }
@@ -134,7 +141,7 @@ app.get('/get-table-sensortype', async (req, res) => {
 });
 
 app.get('/get-table-sensor', async (req, res) => {
-    const data = await db.getSensorsByType(req.query.sensorTypeId);
+    const data = await pgdb.getSensorsByType(req.query.sensorTypeId);
     const header = [
         { name: "id", title: "Id", sortable: true, size: 100 },
         { name: "name", title: "Nome", sortable: true },
@@ -147,7 +154,7 @@ app.get('/get-table-sensor', async (req, res) => {
 
 app.get('/get-table-parameter', async (req, res) => {
     try {
-        const data = await db.getMonitorParamenters(req.query.panelid);
+        const data = await pgdb.getMonitorParamenters(req.query.panelid);
         const header = [
             { name: "id", title: "Id", sortable: true, size: 100 },
             { name: "name", title: "Nome", sortable: true },
@@ -160,17 +167,16 @@ app.get('/get-table-parameter', async (req, res) => {
     } catch (error) {
         console.log(error)
     }
-
 });
 
 app.post('/post-company', async (req, res) => {
     const { id, name, isdeleted } = req.body;
     const data = {
         id: id,
-        name: name,
+        name: name.toUpperCase(),
         isdeleted: isdeleted
     }
-    const returnId = await db.insertData('company', data);
+    const returnId = await pgdb.insertData('company', data);
     const ret = {
         id: returnId
     }
@@ -182,10 +188,10 @@ app.post('/post-branch', async (req, res) => {
     const data = {
         id: id,
         idcompany: idcompany,
-        name: name,
+        name: name.toUpperCase(),
         isdeleted: isdeleted
     }
-    const returnId = await db.insertData('branch', data);
+    const returnId = await pgdb.insertData('branch', data);
     const ret = {
         id: returnId
     }
@@ -197,10 +203,10 @@ app.post('/post-department', async (req, res) => {
     const data = {
         id: id,
         idbranch: idbranch,
-        name: name,
+        name: name.toUpperCase(),
         isdeleted: isdeleted
     }
-    const returnId = await db.insertData('department', data);
+    const returnId = await pgdb.insertData('department', data);
     const ret = {
         id: returnId
     }
@@ -212,45 +218,41 @@ app.post('/post-panel', async (req, res) => {
     const data = {
         id: id,
         iddepartment: iddepartment,
-        name: name,
+        name: name.toUpperCase(),
         isdeleted: isdeleted
     }
-    const returnId = await db.insertData('panel', data);
+    const returnId = await pgdb.insertData('panel', data);
     const ret = {
         id: returnId
     }
     return res.status(200).send(ret);
 });
-
 
 app.post('/post-sensortype', async (req, res) => {
     const { id, name, isdeleted } = req.body;
     const data = {
         id: id,
-        name: name,
+        name: name.toUpperCase(),
         isdeleted: isdeleted
     }
-    const returnId = await db.insertData('typesensor', data);
+    const returnId = await pgdb.insertData('sensortype', data);
     const ret = {
         id: returnId
     }
     return res.status(200).send(ret);
 });
 
-
-
-
 app.post('/post-sensor', async (req, res) => {
     const { id, idtypesensor, name, model, partnumber, isdeleted } = req.body;
     const data = {
         id: id,
-        idtypesensor: idtypesensor,
-        name: name,
-        model: model,
+        idsensortype: idtypesensor,
+        name: name.toUpperCase(),
+        model: model.toUpperCase(),
         partnumber: partnumber,
         isdeleted: isdeleted
     }
-    const returnId = await db.insertData('sensor', data);
+    const returnId = await pgdb.insertData('sensor', data);
     const ret = {
         id: returnId
     }
@@ -269,7 +271,7 @@ app.post('/post-parameter', async (req, res) => {
         isdeleted: isdeleted
     }
     console.log(data)
-    const returnId = await db.insertData('sensorpanel', data);
+    const returnId = await pgdb.insertData('sensorpanel', data);
     const ret = {
         id: returnId
     }
@@ -291,7 +293,7 @@ app.post('/post-data', (req, res) => {
         valuesensor: data.temp
     };
 
-    db.insertData('monitor', dt)
+    pgdb.insertData('monitor', dt)
 
     wss.clients.forEach((client) => {
         client.send(JSON.stringify(data));
